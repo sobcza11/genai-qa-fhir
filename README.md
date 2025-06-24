@@ -32,15 +32,16 @@ This system is designed to:
 
 ---
 
-## 📂 Core Pipeline Modules
+## Core Modules in `src/`
 
-| Stage | Module | Description |
-|-------|--------|-------------|
-| 1 | `src/etl_mimic.py` | Converts MIMIC-IV raw data into clean, structured FHIR-like JSON Bundles |
-| 2 | `src/shap_model_iv.py` | Trains ML model (e.g. RF) and outputs SHAP-based feature attributions |
-| 3 | `src/genai_infer.py` | Prompts a HuggingFace LLM over patient Bundles for clinical summarization |
-| 4 | `scripts/enrich_bundles.py` | Injects SHAP explanations into JSON for downstream QA transparency |
-| 5 | `output/inference_logs/` | Stores structured logs of GenAI outputs for analysis & verification |
+| Module | Purpose |
+|--------|---------|
+| `etl_mimic.py` | ETL pipeline: transforms MIMIC-IV CSVs into clean, FHIR-compatible Bundles |
+| `icd9_decode.py` | Decodes ICD-9 codes using local dictionaries for interpretability |
+| `train_los_model.py` | Trains a classifier to predict patient Length of Stay |
+| `shap_model.py` | Generates SHAP + permutation importance for any classifier |
+| `shap_model_iv.py` | Special SHAP workflow for ICU-focused risk modeling |
+| `genai_infer.py` | Prompts GenAI (LLM) over patient Bundles for explainable summarization |
 
 ---
 
