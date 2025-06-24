@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Environment
+.env
+.venv/
+venv/
+
+# Jupyter
+.ipynb_checkpoints
+
+# Data
+*.csv
+*.json
+1_data/fhir/real/*
+1_data/raw/mimi/core/*
+
+# Output
+output/inference_logs/*
+output/*.log
+
+# Misc
+.DS_Store
+*.log
+*.tmp
+!README.md
+
+/1_data/raw/mimi/core/
+/1_data/raw/mimi/codes/
+/1_data/raw/mimi/heavy/diagnoses_icd/
+/1_data/raw/mimi/heavy/procedures_icd/
+
+# Ignore heavy files locally (not tracked by Git or GitHub)
+0_raw/mimic-iv-note-deidentified-free-text-*.zip
+1_data/raw/mimiciii2/core/labevents.csv
+1_data/raw/mimiciii2/core/prescriptions.csv
+models/los_rf_model.pkl
+1_data/raw/mimiciii2/core/transfers.csv

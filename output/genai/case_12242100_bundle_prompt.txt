@@ -1,0 +1,15 @@
+📘 Clinical QA Prompt for Patient 12242100
+
+Patient Info:
+- Gender: f
+- Birth Date: 1900-04-01
+
+This patient's ICU record contains structured data and SHAP-driven feature importance for a model predicting IV medication usage.
+
+You are a clinical assistant. Please provide:
+1. A summary of the patient's likely risk profile.
+2. A narrative explanation of why the model may have flagged this patient.
+3. Any ethical or fairness concerns based on feature usage (e.g. gender, age).
+4. Suggested next steps for a clinician reviewing this case.
+
+Respond concisely and in layman's terms where possible.
