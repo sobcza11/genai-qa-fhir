@@ -3,7 +3,7 @@
 ### *An Ethical, Modular Clinical Decision Support Pipeline for ICU Patient Summarization*
 
 <p align="center">
-  <img src="synthetic/assets/tagline_pht.png" alt="MIMIC-CDS Logo" width="420"/>
+  <img src="synthetic/assets/header_inferencetrace.png" alt="MIMIC-CDS Logo" width="420"/>
 </p>
 
 <p align="center">
