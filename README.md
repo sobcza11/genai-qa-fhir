@@ -1,4 +1,4 @@
-# 🏥 MIMIC-CDS
+# 🏥 Inference Trace: GenAI’s 2nd Opinion
 
 ### *An Ethical, Modular Clinical Decision Support Pipeline for ICU Patient Summarization*
 
@@ -19,7 +19,7 @@
 
 ## 📌 Overview
 
-**MIMIC-CDS** is a modular, end-to-end **Clinical Decision Support (CDS)** pipeline built on real ICU data from the MIMIC-IV database. It combines **explainable ML**, **FHIR compatibility**, and **GenAI-based clinical summarization** to simulate how modern, ethical, and transparent CDS systems can function in real-world hospital environments.
+**Inference Trace: GenAI’s 2nd Opinion** is a modular, end-to-end **Clinical Decision Support (CDS)** pipeline built on real ICU data from the MIMIC-IV database. It combines **explainable ML**, **FHIR compatibility**, and **GenAI-based clinical summarization** to simulate how modern, ethical, and transparent CDS systems can function in real-world hospital environments
 
 This system is designed to:
 - ✅ Ingest & normalize patient data as FHIR Bundles
