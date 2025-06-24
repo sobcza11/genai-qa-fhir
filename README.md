@@ -50,6 +50,7 @@ This system is designed to:
 ✅ **Permutation Importance**: Global, model-agnostic insight into key drivers  
 ✅ **Bundle Injection**: Explanations embedded directly into FHIR-compatible patient JSON  
 ✅ **FHIR-Safe Integration**: Traceability preserved without violating schema structure
+
 ---
 
 ## 🤖 GenAI Summarization
