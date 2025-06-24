@@ -45,13 +45,11 @@ This system is designed to:
 
 ---
 
-## 🧠 Explainability by Design
-
-- ✅ **SHAP**: Feature-wise importance on individual patients
-- ✅ **Permutation Importance**: Robust, model-agnostic interpretability
-- ✅ **Injection**: Model explanations are written *into* each patient bundle
-- ✅ **FHIR Alignment**: Explanations embedded without breaking resource structure
-
+🧠 **Explainability by Design**  
+✅ **SHAP**: Patient-specific, feature-level model attributions  
+✅ **Permutation Importance**: Global, model-agnostic insight into key drivers  
+✅ **Bundle Injection**: Explanations embedded directly into FHIR-compatible patient JSON  
+✅ **FHIR-Safe Integration**: Traceability preserved without violating schema structure
 ---
 
 ## 🤖 GenAI Summarization
