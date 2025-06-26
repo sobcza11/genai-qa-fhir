@@ -45,6 +45,26 @@ This system is designed to:
 
 ---
 
+## ▶️ Usage Example
+
+Below is a minimal example of how a single patient journey moves through the Inference Trace pipeline:
+
+```bash
+# Step 1: Extract & preprocess from MIMIC-IV CSVs to FHIR JSON
+python src/etl_mimic.py --input core/ --output output/patients/
+
+# Step 2: Predict Length of Stay (LOS) and generate SHAP explanations
+python src/train_los_model.py --input output/patients/ --model output/models/los.pkl
+python src/shap_model_iv.py --input output/patients/ --model output/models/los.pkl --output output/shap/
+
+# Step 3: Prompt GenAI for a natural language summary
+python src/genai_infer.py --input output/patients/ --output output/genai/
+
+# Step 4: Review GenAI response
+cat output/genai/case_10109128_bundle_answer.txt
+
+---
+
 🧠 **Explainability by Design**  
 ✅ **SHAP**: Patient-specific, feature-level model attributions  
 ✅ **Permutation Importance**: Global, model-agnostic insight into key drivers  
