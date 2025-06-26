@@ -1,4 +1,4 @@
-# 🏥 Inference Trace: GenAI’s 2nd Opinion
+# 🏥 Inference Trace: GenAI’s 2nd Opinion HELLO
 
 ### *An Ethical, Modular Clinical Decision Support Pipeline for ICU Patient Summarization*
 
