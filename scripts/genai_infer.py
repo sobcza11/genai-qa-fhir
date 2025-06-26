@@ -1,87 +1,86 @@
 import json
-import hashlib
 import os
 from datetime import datetime
-from pathlib import Path
-from dotenv import load_dotenv
 from huggingface_hub import InferenceClient
+from dotenv import load_dotenv
+from pathlib import Path
 from tqdm import tqdm
 
-# 🔐 Load API token from .env
+# === Load Env ===
 load_dotenv()
 HF_TOKEN = os.getenv("HF_TOKEN")
-MODEL_NAME = "NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO"
+client = InferenceClient("NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO", token=HF_TOKEN)
 
-# 📂 Paths
-input_dir = Path("1_data/fhir/")
-output_dir = Path("output/inference_logs/")
-output_dir.mkdir(parents=True, exist_ok=True)
+# === Paths ===
+input_dir = Path(r"C:\Users\Rand Sobczak Jr\_rts\mlops\genai-qa-fhir\1_data\fhir")
+risk_tag_path = Path(r"C:\Users\Rand Sobczak Jr\_rts\mlops\genai-qa-fhir\7_exper explainability\risk_tags.json")
+log_path = Path(r"C:\Users\Rand Sobczak Jr\_rts\mlops\genai-qa-fhir\output\inference_logs\inference_log.json")
+log_path.parent.mkdir(parents=True, exist_ok=True)
 
-log_file = output_dir / "inference_log.json"
-if not log_file.exists():
-    with open(log_file, "w") as f:
+if not log_path.exists():
+    with open(log_path, "w") as f:
         json.dump([], f)
 
-# ⚙️ Client
-client = InferenceClient(model=MODEL_NAME, token=HF_TOKEN)
+# === Load Risk Tags ===
+if risk_tag_path.exists():
+    with open(risk_tag_path) as f:
+        risk_tags = json.load(f)
+else:
+    risk_tags = {}
+    print("\u26a0\ufe0f No risk_tags.json found.")
 
-# ❓ Questions
+# === Extract Context ===
+def extract_context(patient_json):
+    lines = []
+    for entry in patient_json.get("entry", []):
+        resource = entry.get("resource", {})
+        lines.append(json.dumps(resource, indent=2))
+    return "\n".join(lines)
+
+# === Clinical Questions ===
 questions = [
+    "What is this patient's primary condition and any comorbidities?",
     "What are the patient's top clinical risks?",
-    "Summarize the patient’s recent ICU history.",
     "Are there any abnormal lab results or concerning trends?"
 ]
 
-# 🔧 Utilities
-def hash_text(text):
-    return hashlib.sha256(text.encode()).hexdigest()
-
-def extract_context(patient_json):
-    context_parts = []
-    for entry in patient_json.get("entry", []):
-        resource = entry.get("resource", {})
-        if "text" in resource:
-            context_parts.append(resource["text"].get("div", ""))
-        elif "note" in resource:
-            for note in resource["note"]:
-                context_parts.append(note.get("text", ""))
-    return "\n".join(context_parts).strip()
-
-# 🚀 Main Loop
+# === Process Each File ===
 patient_files = list(input_dir.glob("*.json"))
-print(f"🔍 Running GenAI QA on {len(patient_files)} FHIR bundles...")
+print(f"\U0001f50d Found {len(patient_files)} patient files.")
 
 for file in tqdm(patient_files, desc="Running GenAI QA"):
-    try:
-        with open(file) as f:
-            patient_data = json.load(f)
+    with open(file) as f:
+        data = json.load(f)
 
-        patient_id = patient_data.get("id", file.stem)
-        context = extract_context(patient_data)
-        if not context:
-            continue
+    subject_id = data.get("id") or file.stem
+    context = extract_context(data)
+    if not context:
+        continue
 
-        context_hash = hash_text(context)
-        timestamp = datetime.utcnow().isoformat()
+    if subject_id in risk_tags:
+        context = f"[RISK ALERT] {risk_tags[subject_id]}\n\n{context}"
 
-        for question in questions:
-            prompt = f"Context:\n{context}\n\nQuestion: {question}"
-            answer = client.text_generation(prompt, max_new_tokens=400, temperature=0.3)
+    for question in questions:
+        try:
+            prompt = [
+                {"role": "system", "content": "You are a medical assistant that summarizes key risks and diagnostic patterns from FHIR clinical data."},
+                {"role": "user", "content": f"FHIR Data:\n{context}\n\nQuestion: {question}"}
+            ]
 
-            log_entry = {
-                "patient_id": patient_id,
-                "timestamp": timestamp,
+            response = client.chat_completion(messages=prompt, max_tokens=512, temperature=0.3)
+            result = {
+                "patient_id": subject_id,
+                "timestamp": datetime.utcnow().isoformat(),
                 "question": question,
-                "model_answer": answer,
-                "model_used": MODEL_NAME,
-                "input_context_hash": context_hash
+                "model_answer": response.choices[0].message["content"],
+                "model_used": "Nous-Hermes-2-Mixtral-8x7B-DPO"
             }
 
-            with open(log_file, "r+") as f:
-                data = json.load(f)
-                data.append(log_entry)
+            with open(log_path, "r+", encoding="utf-8") as f:
+                log_data = json.load(f)
+                log_data.append(result)
                 f.seek(0)
-                json.dump(data, f, indent=2)
+                json.dump(log_data, f, indent=2)
 
-    except Exception as e:
-        print(f"❌ Error with {file.name}: {e}")
+        except Exception as e:
+            print(f"\u274c Error with patient {subject_id}: {e}")

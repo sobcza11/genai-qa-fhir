@@ -1,40 +1,37 @@
 import pandas as pd
 import shap
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
+import json
 from pathlib import Path
-import os
+from sklearn.ensemble import RandomForestClassifier
 
-# Paths
-input_path = Path(r"C:\Users\Rand Sobczak Jr\_rts\mlops\genai-qa-fhir\1_data\raw\mimiciii2\core\structured_features.csv")
-output_path = Path(r"C:\Users\Rand Sobczak Jr\_rts\mlops\genai-qa-fhir\output\shap_values.csv")
+# Load patient features
+df = pd.read_json("output/cleaned_patient_conditions/cleaned_features.json", orient="records")
 
-# Load structured features
-df = pd.read_csv(input_path)
+# TEMP FIX: Use first 3 rows only to match dummy labels
+X = df.head(3)
 
-# ✅ Prepare X and y
-features = ['gender', 'anchor_age', 'los', 'num_labs']  # use only existing columns
-df = df.fillna(0)
-X = df[features]
-y = df["target"]
+# Create dummy target labels (must match 3 rows above)
+y = pd.Series([1, 0, 1], name="target")
 
-# ✅ Split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-print(f"✅ Final columns in X_test: {X_test.columns.tolist()}")
+# Train model
+model = RandomForestClassifier(n_estimators=10, random_state=42)
+model.fit(X, y)
 
-# ✅ Train model
-model = RandomForestClassifier(random_state=42)
-model.fit(X_train, y_train)
-
-# ✅ SHAP explainer
+# Run SHAP explainer
 explainer = shap.TreeExplainer(model)
-shap_values = explainer.shap_values(X_test)
+shap_values = explainer.shap_values(X)[1]  # Class 1 SHAP values
 
-# ✅ Debug: Shape check
-print(f"✅ SHAP shape: {shap_values[1].shape} vs X_test shape: {X_test.shape}")
+# Format output by patient ID
+shap_output = {}
+for i, row in X.iterrows():
+    patient_id = f"{i+1:03d}"  # 001, 002, etc.
+    shap_dict = dict(zip(X.columns, shap_values[i]))
+    shap_output[patient_id] = {"shap_values": shap_dict}
 
-# ✅ Save SHAP values for class 1
-shap_df = pd.DataFrame(shap_values[1], columns=X_test.columns)
-shap_df["subject_id"] = df.iloc[X_test.index]["subject_id"].values
-shap_df.to_csv(output_path, index=False)
-print(f"✅ SHAP values for class 1 saved to: {output_path}")
+# Save results
+output_path = Path("4_explainability/4_shap-explainability-cds.json")
+output_path.parent.mkdir(parents=True, exist_ok=True)
+with open(output_path, "w") as f:
+    json.dump(shap_output, f, indent=2)
+
+print("✅ Saved SHAP values to 4_explainability/4_shap-explainability-cds.json")
